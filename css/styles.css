@@ -306,6 +306,7 @@ p { margin: 0; }
 .hero-flat-media { position: relative; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); }
 .hero-flat-media img { width: 100%; display: block; }
 .hero-hotspot { position: absolute; display: block; }
+.hero-mobile-only { display: none; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
@@ -625,6 +626,8 @@ section.section.tight { padding: 60px 0; }
   section.section { padding: 60px 0; }
   .hero-flat { padding: 20px 0 40px; }
   .hero-hotspot { min-height: 32px; }
+  .hero-desktop-only { display: none; }
+  .hero-mobile-only { display: block; }
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .cat-grid { grid-template-columns: 1fr; }
   .philosophy { padding: 46px 26px; }
