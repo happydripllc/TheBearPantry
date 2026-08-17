@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bear-pantry-v2",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-u", "/private/tmp/claude-501/-Users-brittanyadams-Desktop-Website-Coding/0862f2ac-b9ac-413e-af89-a25aca8e531b/scratchpad/serve.py"],
+      "port": 8123
+    }
+  ]
+}

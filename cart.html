@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Cart | The Bear Pantry</title>
+<meta name="description" content="Review your pantry cart before checkout." />
+<link rel="canonical" href="https://www.thebearpantry.com/cart.html" />
+<link rel="icon" href="images/TBPlogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css?v=1" />
+</head>
+<body data-depth="0">
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="site-logo" aria-label="The Bear Pantry home">
+      <img src="images/TBPlogo.png" alt="The Bear Pantry logo" />
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Home</a>
+      <a href="shop.html" class="nav-link">Shop</a>
+      <a href="about.html" class="nav-link">Meet the Bears</a>
+      <a href="faq.html" class="nav-link">FAQ</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+    </nav>
+    <div class="header-right">
+      <a href="cart.html" class="icon-btn" aria-label="View cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-count">0</span>
+      </a>
+      <a href="shop.html" class="btn btn-primary btn-sm">Shop the Pantry</a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+    <a href="/">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">Meet the Bears</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+    <a href="cart.html">Cart</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <div class="container">
+    <div class="crumb"><a href="/">Home</a> / Cart</div>
+    <h1>Your Pantry Cart</h1>
+  </div>
+</div>
+
+<section class="section tight">
+  <div class="container">
+
+    <div class="empty-cart" id="emptyCart">
+      <img src="images/TBPlogo.png" alt="" />
+      <h2>Looks like your pantry's empty.</h2>
+      <p>Let's fix that.</p>
+      <a href="shop.html" class="btn btn-primary">Back to the Pantry</a>
+    </div>
+
+    <div class="cart-layout" id="filledCart" style="display:none;">
+      <div>
+        <div id="cartItems"></div>
+      </div>
+      <div class="cart-summary">
+        <h3 style="margin-bottom:18px;">Order Summary</h3>
+        <div class="cart-summary-row"><span id="cartItemCount">0</span> items</div>
+        <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+        <div class="cart-summary-row" style="color:var(--ink-soft);font-size:0.85rem;">Tax &amp; pickup details calculated at checkout</div>
+        <div class="cart-summary-row total"><span>Total</span><span id="cartTotal">$0.00</span></div>
+        <a href="checkout.html" class="btn btn-primary btn-block" style="margin-top:18px;">Checkout</a>
+        <a href="shop.html" class="btn btn-secondary btn-block" style="margin-top:10px;">Back to the Pantry</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="images/TBPlogo.png" alt="The Bear Pantry logo" />
+        <div class="footer-tagline">From our family table to yours.</div>
+        <p class="footer-sub">Small-batch jams, salsas, pickles &amp; pantry goods made by hand in Texas.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="shop.html">All Products</a>
+        <a href="shop.html?category=sweet">Jams &amp; Preserves</a>
+        <a href="shop.html?category=savory">Salsa &amp; Sauces</a>
+        <a href="shop.html?category=pickled">Pickled &amp; Preserved</a>
+        <a href="shop.html?category=gift">Gift Sets</a>
+      </div>
+      <div class="footer-col">
+        <h4>The Bear Pantry</h4>
+        <a href="about.html">Meet the Bears</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="shipping-pickup.html">Shipping &amp; Pickup</a>
+        <a href="food-safety.html">Food Safety &amp; Storage</a>
+      </div>
+      <div class="footer-col">
+        <h4>What's Mama Bear Making Now?</h4>
+        <p style="font-size:0.88rem;color:rgba(251,247,236,0.7);margin-bottom:12px;">First dibs on fresh batches &amp; seasonal jars.</p>
+        <form data-brand-form data-success="You're in! Welcome to the family.">
+          <div class="footer-signup">
+            <input type="email" placeholder="you@email.com" required aria-label="Email address" />
+            <button type="submit" class="btn btn-primary btn-block">Join the Family</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>The Bear Pantry &bull; Est. 2026 &bull; Texas</span>
+      <div class="policies">
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms.html">Terms</a>
+        <a href="food-safety.html">Food Safety</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script src="js/products.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout | The Bear Pantry</title>
+<meta name="description" content="Reserve your jars for local pickup or delivery." />
+<link rel="canonical" href="https://www.thebearpantry.com/checkout.html" />
+<link rel="icon" href="images/TBPlogo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css?v=1" />
+</head>
+<body data-depth="0">
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="site-logo" aria-label="The Bear Pantry home">
+      <img src="images/TBPlogo.png" alt="The Bear Pantry logo" />
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Home</a>
+      <a href="shop.html" class="nav-link">Shop</a>
+      <a href="about.html" class="nav-link">Meet the Bears</a>
+      <a href="faq.html" class="nav-link">FAQ</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+    </nav>
+    <div class="header-right">
+      <a href="cart.html" class="icon-btn" aria-label="View cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-count">0</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+    <a href="/">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">Meet the Bears</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+    <a href="cart.html">Cart</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <div class="container">
+    <div class="crumb"><a href="/">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+    <h1>Reserve Your Jars</h1>
+    <p class="lede">Tell us what you'd like and how to reach you — Mama Bear will personally confirm your order and arrange pickup or payment.</p>
+  </div>
+</div>
+
+<section class="section tight">
+  <div class="container cart-layout">
+    <div>
+      <form id="checkoutForm" data-brand-form data-success="Got it! Mama Bear (or someone on her behalf) will reach out shortly to confirm your order and arrange pickup." novalidate>
+        <h3 style="margin-bottom:20px;">Your Information</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" required />
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" required />
+          </div>
+          <div class="field full">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+        </div>
+
+        <h3 style="margin:30px 0 16px;">How Would You Like Your Order?</h3>
+        <div class="radio-card-group">
+          <label class="radio-card">
+            <input type="radio" name="fulfillment" value="pickup" checked />
+            <strong>Local Pickup</strong>
+            <span class="sub">We'll confirm a time and location near you.</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="fulfillment" value="delivery" />
+            <strong>Local Delivery</strong>
+            <span class="sub">Where available — we'll confirm by phone or email.</span>
+          </label>
+        </div>
+
+        <div class="field full" style="margin-top:22px;">
+          <label for="notes">Notes for Mama Bear (optional)</label>
+          <textarea id="notes" name="notes" placeholder="Preferred pickup day, gift notes, allergy questions, anything else."></textarea>
+        </div>
+
+        <div class="form-note">
+          The Bear Pantry is a small home-based Texas cottage food business — every order is confirmed personally rather than processed automatically. After you submit this form, we'll follow up to confirm availability, pickup details, and payment (cash, Venmo, or Cash App at pickup).
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:24px;">Reserve My Order</button>
+      </form>
+    </div>
+
+    <div class="cart-summary">
+      <h3 style="margin-bottom:18px;">Order Summary</h3>
+      <div id="checkoutItems"></div>
+      <div class="cart-summary-row total"><span>Estimated Total</span><span id="checkoutTotal">$0.00</span></div>
+      <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:10px;">Final total confirmed at pickup. No payment is collected on this site.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;">
+      <span>The Bear Pantry &bull; Est. 2026 &bull; Texas</span>
+      <div class="policies">
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms.html">Terms</a>
+        <a href="food-safety.html">Food Safety</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script src="js/products.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
