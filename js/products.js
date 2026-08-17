@@ -72,65 +72,14 @@ const PRODUCTS = [
     comingSoon: true
   },
   {
-    slug: "papa-bears-roasted-corn-salsa",
-    name: "Papa Bear's Roasted Corn Salsa",
-    maker: "papa",
-    category: "savory",
-    price: 9,
-    size: "16 oz jar",
-    heat: "Mild",
-    badges: ["Papa Bear's Pick"],
-    image: "images/CornSalsa.jpg",
-    desc: "Charred corn, peppers, and just enough heat to keep you honest.",
-    comingSoon: true
-  },
-  {
-    slug: "golden-pineapple-salsa",
-    name: "Golden Pineapple Salsa",
-    maker: "",
-    category: "savory",
-    price: 9,
-    size: "16 oz jar",
-    heat: "Mild",
-    badges: ["Seasonal"],
-    image: "images/PineappleSalsa.jpg",
-    desc: "Sweet, sunny, and the first jar to disappear at every family gathering.",
-    comingSoon: true
-  },
-  {
-    slug: "seasonal-pickled-assortment",
-    name: "Seasonal Pickled Assortment",
+    slug: "cowboy-candy",
+    name: "Cowboy Candy",
     maker: "",
     category: "pickled",
-    price: 12,
-    size: "3-jar sampler",
+    size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/PickledGoods.jpg",
-    desc: "Whatever Mama Bear got carried away pickling that week. Never the same jar twice.",
-    comingSoon: true
-  },
-  {
-    slug: "dried-fruit-drink-boosters",
-    name: "Dried Fruit Drink Boosters",
-    maker: "",
-    category: "pantry",
-    price: 6,
-    size: "4 oz pouch",
-    badges: ["Pantry Favorite"],
-    image: "images/DriedFruitDrinkBoosters.jpg",
-    desc: "Dehydrated fruit made for dropping into tea, water, or whatever's sweating on the porch table.",
-    comingSoon: true
-  },
-  {
-    slug: "mama-bears-banana-bread",
-    name: "Mama Bear's Banana Bread",
-    maker: "mama",
-    category: "seasonal",
-    price: 8,
-    size: "1 loaf",
-    badges: ["Seasonal"],
-    image: "images/BananaBread.jpg",
-    desc: "Made whenever the bananas on the counter finally win the argument.",
+    desc: "Candied jalapeños — sweet, hot, and gone in a hurry on crackers with cream cheese.",
     comingSoon: true
   },
   {
@@ -155,3 +104,24 @@ const CATEGORY_LABELS = {
   seasonal: "Seasonal",
   gift: "Gift Sets"
 };
+
+/* Everything else Mama Bear makes — no dedicated photography yet,
+   so these live in a plain list instead of a fake product card. */
+const PANTRY_LIST = [
+  {
+    group: "More Jams & Preserves",
+    items: ["Strawberry Jam", "Raspberry Jam", "Aprium Jam", "Ginger Aprium Jam"]
+  },
+  {
+    group: "Pickled & Canned Vegetables",
+    items: ["Beets", "Pickled Beets", "Pickled Carrots", "Pickled Sweet Peppers", "Carrots"]
+  },
+  {
+    group: "Pantry & Canned Goods",
+    items: ["Canned Pineapple", "Canned Grapes", "Canned Cherries", "Canned Chicken", "Apple Pie Filling", "Chicken Stew", "Chili with Beans", "Pinto Beans with Ham", "Navy Beans with Ham", "Dried Onions", "Breadcrumbs", "Italian Dressing", "Applesauce"]
+  },
+  {
+    group: "Coming Soon Specialties",
+    items: ["Candied Pecans, Walnuts & Almonds — sweet, spicy or both", "Seasonal Chocolate & Peanut Butter Fudge"]
+  }
+];

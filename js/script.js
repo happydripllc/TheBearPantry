@@ -319,6 +319,20 @@
     el.innerHTML = list.map(function (p) { return productCardHTML(p, "../"); }).join("");
   }
 
+  /* ---------- Pantry list (flavors without dedicated photography yet) ---------- */
+  function initPantryList() {
+    var el = document.getElementById("pantryList");
+    if (!el || typeof PANTRY_LIST === "undefined") return;
+    el.innerHTML = PANTRY_LIST.map(function (group) {
+      return (
+        '<div class="pantry-list-col">' +
+        "<h4>" + group.group + "</h4>" +
+        "<ul>" + group.items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>" +
+        "</div>"
+      );
+    }).join("");
+  }
+
   /* ---------- Forms (progressive — no backend yet) ---------- */
   function initForms() {
     document.querySelectorAll("form[data-brand-form]").forEach(function (form) {
@@ -356,6 +370,7 @@
     initFaq();
     initShop();
     initFeatured();
+    initPantryList();
     initPDP();
     initRelated();
     initForms();

@@ -512,6 +512,36 @@ section.section.tight { padding: 60px 0; }
 .kitchen-note h4 { font-family: var(--font-display); font-style: italic; margin-bottom: 6px; }
 .kitchen-note p { font-size: 0.92rem; color: var(--ink-soft); }
 
+/* ---------- Pantry list (no-photo flavor list) ---------- */
+.pantry-list-band {
+  background: var(--cream-deep);
+  border-radius: var(--radius-lg);
+  padding: 54px 56px;
+}
+.pantry-list-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px;
+  margin-top: 8px;
+}
+.pantry-list-col h4 {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--rust);
+  font-weight: 700;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--parchment-line);
+}
+.pantry-list-col ul { list-style: none; }
+.pantry-list-col li {
+  font-size: 0.94rem;
+  color: var(--ink-soft);
+  padding: 6px 0;
+}
+
 /* ---------- FAQ ---------- */
 .faq-item { border-bottom: 1px solid var(--parchment-line); }
 .faq-q {
@@ -613,6 +643,7 @@ section.section.tight { padding: 60px 0; }
   .shop-layout { grid-template-columns: 1fr; }
   .filter-panel { position: static; }
   .testimonial-grid { grid-template-columns: 1fr; }
+  .pantry-list-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 760px) {
@@ -642,4 +673,6 @@ section.section.tight { padding: 60px 0; }
   .cart-item .name-wrap { grid-area: name; }
   .form-grid { grid-template-columns: 1fr; }
   .stat-row { gap: 32px; flex-wrap: wrap; }
+  .pantry-list-band { padding: 34px 26px; }
+  .pantry-list-grid { grid-template-columns: 1fr; gap: 26px; }
 }
