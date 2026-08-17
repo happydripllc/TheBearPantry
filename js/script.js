@@ -150,6 +150,7 @@
     var overlay = document.getElementById("quickViewOverlay");
     var body = document.getElementById("quickViewBody");
     if (!overlay || !body) return;
+    var base = document.body.getAttribute("data-depth") === "1" ? "../" : "";
     var badges = product.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
     body.innerHTML =
       '<span class="pdp-maker">' + (product.maker === "mama" ? "Mama Bear's" : product.maker === "papa" ? "Papa Bear's" : "The Bear Pantry") + "</span>" +
@@ -159,9 +160,9 @@
       '<div class="pdp-badges">' + badges + "</div>" +
       '<div class="hero-ctas">' +
       '<button class="btn btn-primary" onclick="BearPantry.addToCart(\'' + product.slug + "', 1); BearPantry.closeQuickView();\">Add to Cart</button>" +
-      '<a class="btn btn-secondary" href="' + product.detail + '">Full Details</a>' +
+      '<a class="btn btn-secondary" href="' + base + product.detail + '">Full Details</a>' +
       "</div>";
-    document.getElementById("quickViewImg").src = product.image;
+    document.getElementById("quickViewImg").src = base + product.image;
     document.getElementById("quickViewImg").alt = product.name;
     overlay.classList.add("open");
   }
