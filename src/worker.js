@@ -16,9 +16,67 @@ export default {
       return jsonResponse({ ok: true, resendKeyConfigured: !!env.RESEND_API_KEY });
     }
 
+    if (url.pathname === "/api/contact" && request.method === "POST") {
+      return handleContact(request, env);
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
+
+async function handleContact(request, env) {
+  let data;
+  try {
+    data = await request.json();
+  } catch (err) {
+    return jsonResponse({ ok: false, error: "That message didn't come through right — invalid data." }, 400);
+  }
+
+  const name = ((data && data.name) || "").trim();
+  const email = ((data && data.email) || "").trim();
+  const reason = ((data && data.reason) || "General Question").trim();
+  const message = ((data && data.message) || "").trim();
+
+  if (!name || !email || !message) {
+    return jsonResponse({ ok: false, error: "Name, email, and a message are all required." }, 400);
+  }
+  if (!env.RESEND_API_KEY) {
+    return jsonResponse({ ok: false, error: "Contact form isn't configured yet — missing RESEND_API_KEY." }, 500);
+  }
+
+  const html =
+    '<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#2a2420;">' +
+    '<h2 style="color:#26402b;">New Contact Form Message</h2>' +
+    "<p><strong>" + escapeHtml(name) + "</strong><br>" + escapeHtml(email) + "</p>" +
+    "<p><strong>Subject:</strong> " + escapeHtml(reason) + "</p>" +
+    '<p style="white-space:pre-wrap;">' + escapeHtml(message) + "</p>" +
+    '<p style="color:#6b5c45;font-size:13px;margin-top:20px;">Submitted from the thebearpantry.com contact form.</p>' +
+    "</div>";
+
+  const text =
+    "New Contact Form Message\n\n" +
+    name + "\n" + email + "\n\n" +
+    "Subject: " + reason + "\n\n" +
+    message;
+
+  const result = await sendResendEmail(env, {
+    from: "The Bear Pantry <orders@thebearpantry.com>",
+    to: ["hello@thebearpantry.com"],
+    reply_to: email,
+    subject: "Contact form: " + reason + " — from " + name,
+    html: html,
+    text: text
+  });
+
+  if (!result.ok) {
+    if (result.networkError) {
+      return jsonResponse({ ok: false, error: "Couldn't reach the email service. Please try again." }, 502);
+    }
+    return jsonResponse({ ok: false, error: "The email service rejected the message.", detail: result.detail }, 502);
+  }
+
+  return jsonResponse({ ok: true });
+}
 
 async function handleOrder(request, env) {
   let data;

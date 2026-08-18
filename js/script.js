@@ -420,9 +420,62 @@
     });
   }
 
+  /* ---------- Contact form: submits to /api/contact (see src/worker.js) ---------- */
+  function initContactForm() {
+    var form = document.getElementById("contactForm");
+    if (!form) return;
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      var originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+
+      var payload = {
+        name: form.name.value,
+        email: form.email.value,
+        reason: form.reason.value,
+        message: form.message.value
+      };
+
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (!result.ok || !result.data.ok) {
+            throw new Error((result.data && result.data.error) || "Something went wrong sending your message.");
+          }
+          var wrap = document.createElement("div");
+          wrap.className = "form-note";
+          wrap.style.marginTop = "18px";
+          wrap.innerHTML = "<strong>Thanks for reaching out — we'll get back to you soon.</strong>";
+          form.appendChild(wrap);
+          form.querySelectorAll("input, textarea, select, button[type=submit]").forEach(function (f) { f.disabled = true; });
+        })
+        .catch(function (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          var wrap = document.createElement("div");
+          wrap.className = "form-note";
+          wrap.style.borderColor = "var(--rust)";
+          wrap.style.marginTop = "18px";
+          wrap.innerHTML = "<strong>" + err.message + " Please try again, or email us directly at hello@thebearpantry.com.</strong>";
+          form.appendChild(wrap);
+        });
+    });
+  }
+
   /* ---------- Forms (progressive — no backend yet) ---------- */
   function initForms() {
-    document.querySelectorAll("form[data-brand-form]:not(#checkoutForm)").forEach(function (form) {
+    document.querySelectorAll("form[data-brand-form]:not(#checkoutForm):not(#contactForm)").forEach(function (form) {
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var successMsg = form.getAttribute("data-success") || "Thanks — we got it!";
@@ -460,6 +513,7 @@
     initPDP();
     initRelated();
     initCheckoutForm();
+    initContactForm();
     initForms();
     updateCartBadge();
     renderCartPage();
