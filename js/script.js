@@ -619,6 +619,26 @@
         // Newsletter forms have a real action/target (see HTML) and actually
         // submit to Zoho via the hidden iframe — don't block that submission.
         var isNewsletter = form.hasAttribute("data-newsletter-form");
+
+        if (isNewsletter) {
+          var emailInput = form.querySelector('input[type="email"]');
+          var existingErr = form.querySelector(".form-error");
+          if (existingErr) existingErr.remove();
+          if (emailInput && !emailInput.value.trim()) {
+            // Autofill can sometimes show a suggestion without actually
+            // committing a value to the field — catch that here instead of
+            // silently sending Zoho a blank entry with a fake success message.
+            e.preventDefault();
+            emailInput.focus();
+            var err = document.createElement("div");
+            err.className = "form-error";
+            err.style.cssText = "margin-top:10px;color:var(--rust);font-size:0.86rem;";
+            err.textContent = "That didn't come through — please type your email and try again.";
+            form.appendChild(err);
+            return;
+          }
+        }
+
         if (!isNewsletter) e.preventDefault();
         var successMsg = form.getAttribute("data-success") || "Thanks — we got it!";
         var wrap = document.createElement("div");
