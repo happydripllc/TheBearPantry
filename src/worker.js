@@ -12,6 +12,10 @@ export default {
       return handleOrder(request, env);
     }
 
+    if (url.pathname === "/api/order" && request.method === "GET") {
+      return jsonResponse({ ok: true, resendKeyConfigured: !!env.RESEND_API_KEY });
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
