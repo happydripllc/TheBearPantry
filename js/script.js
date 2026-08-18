@@ -385,6 +385,39 @@
     });
   }
 
+  /* ---------- Product image lightbox (click main image to view full size) ---------- */
+  function ensureLightbox() {
+    var lb = document.getElementById("pdpLightbox");
+    if (lb) return lb;
+    lb = document.createElement("div");
+    lb.className = "pdp-lightbox";
+    lb.id = "pdpLightbox";
+    lb.innerHTML = '<button class="pdp-lightbox-close" aria-label="Close">&times;</button><img src="" alt="" />';
+    document.body.appendChild(lb);
+    lb.addEventListener("click", function (e) {
+      if (e.target === lb || e.target.classList.contains("pdp-lightbox-close")) {
+        lb.classList.remove("open");
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") lb.classList.remove("open");
+    });
+    return lb;
+  }
+  function initImageLightbox() {
+    var galleryEl = document.querySelector(".pdp-gallery");
+    if (!galleryEl) return;
+    galleryEl.addEventListener("click", function (e) {
+      var img = e.target.closest("img");
+      if (!img || img.closest(".pdp-gallery-thumbs")) return;
+      var lb = ensureLightbox();
+      var lbImg = lb.querySelector("img");
+      lbImg.src = img.src;
+      lbImg.alt = img.alt;
+      lb.classList.add("open");
+    });
+  }
+
   /* ---------- Product detail page: qty stepper + add to cart ---------- */
   function initPDP() {
     var stepper = document.getElementById("pdpQtyStepper");
@@ -609,6 +642,7 @@
     initPantryList();
     initGenericProductPage();
     initPDPGallery();
+    initImageLightbox();
     initPDP();
     initRelated();
     initCheckoutForm();
