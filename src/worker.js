@@ -96,33 +96,95 @@ async function handleOrder(request, env) {
     }).join("\n") +
     "\n\nEstimated Total: $" + subtotal.toFixed(2);
 
-  let resendRes;
+  const firstName = (customer.name || "").trim().split(/\s+/)[0] || customer.name;
+  const fulfillmentPhrase = fulfillment === "delivery" ? "get your delivery lined up" : "get your pickup lined up";
+
+  const customerHtml =
+    '<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#2a2420;">' +
+    '<h2 style="color:#26402b;">Pull up a chair, ' + escapeHtml(firstName) + ' — you\'re on the list.</h2>' +
+    "<p>Mama Bear just got your order and she's already deciding which jars to set aside for you. She'll reach out soon by phone or email to " +
+    fulfillmentPhrase + " and arrange payment (cash, Venmo, or Cash App) — nothing was charged online.</p>" +
+    "<p><strong>Here's what you ordered:</strong></p>" +
+    '<table style="width:100%;border-collapse:collapse;margin-top:10px;">' +
+    itemRowsHtml +
+    '<tr><td style="padding:10px;font-weight:bold;">Estimated Total</td>' +
+    '<td style="padding:10px;font-weight:bold;text-align:right;">$' + subtotal.toFixed(2) + "</td></tr>" +
+    "</table>" +
+    (deliveryAddress
+      ? '<p style="margin-top:16px;">We\'ve got your delivery address as <strong>' + escapeHtml(addressLine) +
+        "</strong>. If that's not right, just reply to this email and let us know.</p>"
+      : "") +
+    (notes ? "<p><strong>Your notes:</strong> " + escapeHtml(notes) + "</p>" : "") +
+    '<p style="margin-top:20px;">Thanks for pulling up a chair.<br>&mdash; The Bear Pantry</p>' +
+    "</div>";
+
+  const customerText =
+    "Pull up a chair, " + firstName + " — you're on the list.\n\n" +
+    "Mama Bear just got your order and she's already deciding which jars to set aside for you. " +
+    "She'll reach out soon by phone or email to " + fulfillmentPhrase + " and arrange payment " +
+    "(cash, Venmo, or Cash App) — nothing was charged online.\n\n" +
+    "Here's what you ordered:\n" +
+    items.map(function (i) {
+      return i.qty + " x " + i.name + (i.size ? " (" + i.size + ")" : "") + " — $" + ((Number(i.price) || 0) * (Number(i.qty) || 0)).toFixed(2);
+    }).join("\n") +
+    "\n\nEstimated Total: $" + subtotal.toFixed(2) +
+    (deliveryAddress ? "\n\nDelivery address on file: " + addressLine + " (reply to this email if that's not right)" : "") +
+    (notes ? "\n\nYour notes: " + notes : "") +
+    "\n\nThanks for pulling up a chair.\n— The Bear Pantry";
+
+  const [notifyResult, customerResult] = await Promise.all([
+    sendResendEmail(env, {
+      from: "The Bear Pantry <orders@thebearpantry.com>",
+      to: ["orders@thebearpantry.com"],
+      reply_to: customer.email,
+      subject: "New order request from " + customer.name,
+      html: html,
+      text: text
+    }),
+    sendResendEmail(env, {
+      from: "The Bear Pantry <orders@thebearpantry.com>",
+      to: [customer.email],
+      subject: "You're on the list, " + firstName + "! 🐻",
+      html: customerHtml,
+      text: customerText
+    })
+  ]);
+
+  // Internal notification behavior is unchanged: its failure still fails the request.
+  if (!notifyResult.ok) {
+    if (notifyResult.networkError) {
+      return jsonResponse({ ok: false, error: "Couldn't reach the email service. Please try again." }, 502);
+    }
+    return jsonResponse({ ok: false, error: "The email service rejected the order.", detail: notifyResult.detail }, 502);
+  }
+
+  // Customer confirmation is best-effort: the order is already in via the
+  // notification above, so a failed confirmation email shouldn't block checkout.
+  if (!customerResult.ok) {
+    console.error("Customer confirmation email failed:", customerResult.detail || customerResult);
+  }
+
+  return jsonResponse({ ok: true });
+}
+
+async function sendResendEmail(env, payload) {
   try {
-    resendRes = await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Authorization": "Bearer " + env.RESEND_API_KEY,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        from: "The Bear Pantry <orders@thebearpantry.com>",
-        to: ["orders@thebearpantry.com"],
-        reply_to: customer.email,
-        subject: "New order request from " + customer.name,
-        html: html,
-        text: text
-      })
+      body: JSON.stringify(payload)
     });
+    if (!res.ok) {
+      const detail = await res.text();
+      return { ok: false, networkError: false, detail: detail };
+    }
+    return { ok: true };
   } catch (err) {
-    return jsonResponse({ ok: false, error: "Couldn't reach the email service. Please try again." }, 502);
+    return { ok: false, networkError: true, detail: String(err) };
   }
-
-  if (!resendRes.ok) {
-    const detail = await resendRes.text();
-    return jsonResponse({ ok: false, error: "The email service rejected the order.", detail: detail }, 502);
-  }
-
-  return jsonResponse({ ok: true });
 }
 
 function jsonResponse(obj, status) {
