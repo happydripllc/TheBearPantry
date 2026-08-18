@@ -618,14 +618,26 @@
       form.addEventListener("submit", function (e) {
         // Newsletter forms have a real action/target (see HTML) and actually
         // submit to Zoho via the hidden iframe — don't block that submission.
-        if (!form.hasAttribute("data-newsletter-form")) e.preventDefault();
+        var isNewsletter = form.hasAttribute("data-newsletter-form");
+        if (!isNewsletter) e.preventDefault();
         var successMsg = form.getAttribute("data-success") || "Thanks — we got it!";
         var wrap = document.createElement("div");
         wrap.className = "form-note";
         wrap.style.marginTop = "18px";
         wrap.innerHTML = "<strong>" + successMsg + "</strong>";
         form.appendChild(wrap);
-        form.querySelectorAll("input, textarea, select, button[type=submit]").forEach(function (f) { f.disabled = true; });
+        var disableFields = function () {
+          form.querySelectorAll("input, textarea, select, button[type=submit]").forEach(function (f) { f.disabled = true; });
+        };
+        // Disabling the submit button synchronously while the submit event is
+        // still being handled makes the browser abort its own form submission
+        // — so for the newsletter forms (which need that real submission to
+        // reach Zoho), defer disabling to the next tick instead.
+        if (isNewsletter) {
+          setTimeout(disableFields, 0);
+        } else {
+          disableFields();
+        }
       });
     });
 
