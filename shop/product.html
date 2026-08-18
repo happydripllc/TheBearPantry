@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mama Bear's Bread &amp; Butter Pickles | The Bear Pantry</title>
-<meta name="description" content="Sweet, tangy, and crisp enough to snap. Small-batch bread &amp; butter pickles, 16 oz jar. Made by hand in Texas." />
-<link rel="canonical" href="https://www.thebearpantry.com/shop/mama-bears-bread-and-butter-pickles.html" />
+<title>The Bear Pantry</title>
+<meta name="description" content="Small-batch jams, salsas, pickles, preserves &amp; pantry goods from The Bear Pantry. Made by hand in Fort Worth, TX." />
 <link rel="icon" href="../images/TBPlogo-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -52,47 +51,34 @@
   </nav>
 </header>
 
-<section class="section tight">
+<section class="section tight" id="genericProductPage">
   <div class="container">
-    <div class="crumb"><a href="../">Home</a> / <a href="../shop.html">Shop</a> / Mama Bear's Bread &amp; Butter Pickles</div>
-    <div class="pdp-grid">
+    <div class="crumb"><a href="../">Home</a> / <a href="../shop.html">Shop</a> / <span id="pdpCrumbName"></span></div>
+    <div class="pdp-grid" id="pdpContent">
       <div class="pdp-gallery">
-        <img src="../images/mama-bears-bread-and-butter-pickles.png" alt="Mama Bear's Bread &amp; Butter Pickles jar label, The Bear Pantry" />
+        <img id="pdpImage" src="" alt="" />
       </div>
       <div>
-        <span class="pdp-maker">Mama Bear's</span>
-        <h1 class="pdp-title">Bread &amp; Butter Pickles</h1>
-        <div class="pdp-badges">
-          <span class="badge badge-batch">Small Batch</span>
-          <span class="badge badge-mama">Mama Bear's Pick</span>
-          <span class="badge badge-outline">Sweet &amp; Tangy</span>
-        </div>
-        <div class="pdp-price">$8.50 <span class="size">16 oz jar</span></div>
-        <p class="pdp-desc">Sweet, tangy, and crisp enough to snap — sliced thick, packed tight, and gone faster than Mama Bear will admit. This is the jar she quietly moves to the back of the fridge so the grandkids don't find it first.</p>
+        <span class="pdp-maker" id="pdpMaker"></span>
+        <h1 class="pdp-title" id="pdpTitleText"></h1>
+        <div class="pdp-badges" id="pdpBadges"></div>
+        <div class="pdp-price" id="pdpPriceText"></div>
+        <p class="pdp-desc" id="pdpDescText"></p>
         <div class="pdp-row">
           <div class="qty-stepper" id="pdpQtyStepper">
             <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
             <span id="pdpQty">1</span>
             <button type="button" data-step="1" aria-label="Increase quantity">+</button>
           </div>
-          <button class="btn btn-primary btn-block" id="pdpAddBtn" data-slug="mama-bears-bread-and-butter-pickles" style="flex:1;">Add to Cart</button>
+          <button class="btn btn-primary btn-block" id="pdpAddBtn" style="flex:1;">Add to Cart</button>
         </div>
         <p style="font-size:0.86rem;color:var(--ink-soft);margin-top:-14px;margin-bottom:10px;">Local pickup available. Details at checkout.</p>
-
-        <div class="kitchen-note">
-          <img src="../images/MamaBear%26PapaBear3.jpg" alt="Mama Bear" />
-          <div>
-            <h4>From Mama Bear's Kitchen</h4>
-            <p>This is the pickle recipe Mama Bear's been making since before The Bear Pantry had a name — the one people used to just show up and ask for by the jarful.</p>
-          </div>
-        </div>
-
-        <div class="pdp-meta">
-          <div class="pdp-meta-row"><span class="k">Ingredients</span><span class="v">Cucumbers, onion, vinegar, sugar, mustard seed, turmeric, celery seed</span></div>
-          <div class="pdp-meta-row"><span class="k">Storage</span><span class="v">Refrigerate after opening, use within 4 weeks</span></div>
-          <div class="pdp-meta-row"><span class="k">Availability</span><span class="v">Made in small batches — while supplies last</span></div>
-        </div>
+        <div class="pdp-meta" id="pdpMeta"></div>
       </div>
+    </div>
+    <div id="pdpNotFound" style="display:none;text-align:center;padding:60px 0;">
+      <h2>Mama Bear hasn't made that yet.</h2>
+      <p style="color:var(--ink-soft);margin-top:10px;"><a href="../shop.html" style="text-decoration:underline;color:var(--forest)">Back to the Pantry</a></p>
     </div>
   </div>
 </section>
@@ -103,7 +89,7 @@
       <div class="eyebrow" style="justify-content:center">You Might Also Like</div>
       <h2>More from the pantry.</h2>
     </div>
-    <div class="product-grid" id="relatedGrid" data-exclude="mama-bears-bread-and-butter-pickles"></div>
+    <div class="product-grid" id="relatedGrid"></div>
   </div>
 </section>
 

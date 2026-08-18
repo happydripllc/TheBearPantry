@@ -112,12 +112,13 @@
   }
   function productCardHTML(p, base) {
     base = base || "";
-    var link = p.comingSoon ? "javascript:void(0)" : base + p.detail;
+    var detail = p.detail || ("shop/product.html?slug=" + p.slug);
+    var link = p.comingSoon ? "javascript:void(0)" : base + detail;
     var badges = p.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
     var soonBadge = p.comingSoon ? '<span class="badge badge-soon">Coming Soon</span>' : "";
-    var priceHTML = p.comingSoon
-      ? '<span class="product-price">Coming soon</span>'
-      : '<span class="product-price">$' + p.price.toFixed(2) + ' <span class="size">' + p.size + "</span></span>";
+    var priceHTML = (p.price != null)
+      ? '<span class="product-price">$' + p.price.toFixed(2) + ' <span class="size">' + p.size + "</span></span>"
+      : '<span class="product-price">Coming soon</span>';
     var cartBtn = p.comingSoon
       ? '<button class="add-cart-btn" title="Mama Bear needs to make another batch" disabled>' + bellIcon() + "</button>"
       : '<button class="add-cart-btn" title="Add to cart" onclick="event.preventDefault();BearPantry.addToCart(\'' + p.slug + "', 1)\">" + cartIcon() + "</button>";
@@ -151,6 +152,7 @@
     var body = document.getElementById("quickViewBody");
     if (!overlay || !body) return;
     var base = document.body.getAttribute("data-depth") === "1" ? "../" : "";
+    var detail = product.detail || ("shop/product.html?slug=" + product.slug);
     var badges = product.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
     body.innerHTML =
       '<span class="pdp-maker">' + (product.maker === "mama" ? "Mama Bear's" : product.maker === "papa" ? "Papa Bear's" : "The Bear Pantry") + "</span>" +
@@ -160,7 +162,7 @@
       '<div class="pdp-badges">' + badges + "</div>" +
       '<div class="hero-ctas">' +
       '<button class="btn btn-primary" onclick="BearPantry.addToCart(\'' + product.slug + "', 1); BearPantry.closeQuickView();\">Add to Cart</button>" +
-      '<a class="btn btn-secondary" href="' + base + product.detail + '">Full Details</a>' +
+      '<a class="btn btn-secondary" href="' + base + detail + '">Full Details</a>' +
       "</div>";
     document.getElementById("quickViewImg").src = base + product.image;
     document.getElementById("quickViewImg").alt = product.name;
@@ -294,6 +296,60 @@
     el.innerHTML = slugs.map(function (s) { return productCardHTML(findProduct(s)); }).join("");
   }
 
+  /* ---------- Generic product page (shop/product.html?slug=...) ---------- */
+  function initGenericProductPage() {
+    var page = document.getElementById("genericProductPage");
+    if (!page) return;
+
+    var slug = new URLSearchParams(window.location.search).get("slug");
+    var product = slug ? findProduct(slug) : null;
+
+    if (!product) {
+      document.getElementById("pdpContent").style.display = "none";
+      document.getElementById("pdpNotFound").style.display = "block";
+      return;
+    }
+
+    document.title = product.name + " | The Bear Pantry";
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", product.desc);
+
+    document.getElementById("pdpCrumbName").textContent = product.name;
+    document.getElementById("pdpImage").src = "../" + product.image;
+    document.getElementById("pdpImage").alt = product.name + " jar, The Bear Pantry";
+    document.getElementById("pdpMaker").textContent =
+      product.maker === "mama" ? "Mama Bear's" : product.maker === "papa" ? "Papa Bear's" : "The Bear Pantry";
+    document.getElementById("pdpTitleText").textContent = product.name;
+    document.getElementById("pdpBadges").innerHTML =
+      product.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
+    document.getElementById("pdpPriceText").innerHTML =
+      (product.price != null)
+        ? "$" + product.price.toFixed(2) + ' <span class="size">' + product.size + "</span>"
+        : "Coming soon";
+    document.getElementById("pdpDescText").textContent = product.desc;
+
+    var metaRows = "";
+    if (product.ingredients) {
+      metaRows += '<div class="pdp-meta-row"><span class="k">Ingredients</span><span class="v">' + product.ingredients + "</span></div>";
+    }
+    if (product.heat) {
+      metaRows += '<div class="pdp-meta-row"><span class="k">Heat Level</span><span class="v">' + product.heat + "</span></div>";
+    }
+    metaRows += '<div class="pdp-meta-row"><span class="k">Availability</span><span class="v">Made in small batches — while supplies last</span></div>';
+    document.getElementById("pdpMeta").innerHTML = metaRows;
+
+    var addBtn = document.getElementById("pdpAddBtn");
+    if (product.comingSoon) {
+      addBtn.textContent = "Mama Bear needs to make another batch";
+      addBtn.disabled = true;
+    } else {
+      addBtn.setAttribute("data-slug", product.slug);
+    }
+
+    var relatedGrid = document.getElementById("relatedGrid");
+    if (relatedGrid) relatedGrid.setAttribute("data-exclude", product.slug);
+  }
+
   /* ---------- Product detail page: qty stepper + add to cart ---------- */
   function initPDP() {
     var stepper = document.getElementById("pdpQtyStepper");
@@ -324,6 +380,12 @@
   function initPantryList() {
     var el = document.getElementById("pantryList");
     if (!el || typeof PANTRY_LIST === "undefined") return;
+    if (!PANTRY_LIST.length) {
+      var band = el.closest(".pantry-list-band");
+      var section = band ? band.closest("section") : null;
+      if (section) section.style.display = "none";
+      return;
+    }
     el.innerHTML = PANTRY_LIST.map(function (group) {
       return (
         '<div class="pantry-list-col">' +
@@ -510,6 +572,7 @@
     initShop();
     initFeatured();
     initPantryList();
+    initGenericProductPage();
     initPDP();
     initRelated();
     initCheckoutForm();

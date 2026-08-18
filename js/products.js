@@ -1,7 +1,16 @@
 /* THE BEAR PANTRY — product data
    Single source of truth for the shop grid, homepage featured cards,
    quick view modal, and cart line items. Add a new jar here and it
-   shows up everywhere automatically. */
+   shows up everywhere automatically.
+
+   Pricing note: prices below are DFW-market estimates (small-batch/
+   farmers-market comps researched Aug 2026 — 8oz jams ~$6-12,
+   16oz pickled/canned ~$8-12 urban artisan, candied nuts ~$12/12oz jar,
+   fudge ~$12-20/lb). Treat as a starting point, not final — easy to
+   adjust per item once real sales data comes in.
+
+   Product names below match what's printed on each jar's label art —
+   check the label image before renaming anything. */
 
 const PRODUCTS = [
   {
@@ -51,239 +60,332 @@ const PRODUCTS = [
   /* ---------- Jams & Preserves ---------- */
   {
     slug: "mama-bears-blackberry-jam",
-    name: "Mama Bear's Blackberry Jam",
+    name: "Blackberry Bear Hug Jam",
     maker: "mama",
     category: "sweet",
+    price: 8.5,
     size: "8 oz jar",
     badges: ["Seasonal", "Small Batch"],
     image: "images/BlackberryJam.jpeg",
     desc: "Wild blackberries, slow-simmered until Mama Bear decides it's ready — usually when the kitchen smells right.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "sunrise-orange-marmalade",
-    name: "Sunrise Orange Marmalade",
+    name: "Mama Bear's Sunrise Orange Marmalade",
     maker: "mama",
     category: "sweet",
+    price: 8.5,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/SunriseOrangeMarmalade.jpeg",
     desc: "Bright, bittersweet, and stubbornly good on a warm biscuit.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "strawberry-jam",
-    name: "Strawberry Jam",
+    name: "Strawberry Snuggle Jam",
     maker: "mama",
     category: "sweet",
+    price: 8,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/StrawberryJam.jpeg",
     desc: "Classic, sweet, and the first jar to go missing whenever there's fresh bread in the house.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "raspberry-jam",
-    name: "Raspberry Jam",
+    name: "Raspberry Rooftop Jam",
     maker: "mama",
     category: "sweet",
+    price: 8.5,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/RaspberryRooftopJam.jpeg",
     desc: "Tart, bright, and seedy in the good way — the way raspberry jam is supposed to be.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "aprium-jam",
-    name: "Aprium Jam",
+    name: "Aprium Sunshine Jam",
     maker: "mama",
     category: "sweet",
+    price: 9,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/ApriumJam.jpeg",
     desc: "Part apricot, part plum, entirely worth asking Mama Bear what an aprium even is.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "ginger-aprium-jam",
-    name: "Ginger Aprium Jam",
+    name: "Golden Bear Ginger Aprium Jam",
     maker: "mama",
     category: "sweet",
+    price: 9.5,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/GingerApriumJam.jpeg",
     desc: "The aprium jam's spicier cousin — a warm ginger kick right behind the sweetness.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "pineapple-preserves",
-    name: "Pineapple Preserves",
-    maker: "",
+    name: "Papa Bear's Pineapple Preserves",
+    maker: "papa",
     category: "sweet",
+    price: 8.5,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/PineapplePreserves.jpeg",
     desc: "Sunny, a little tropical, and gone faster than anyone expects for a jar nobody saw coming.",
-    comingSoon: true
+    comingSoon: false
+  },
+  {
+    slug: "little-bears-sweet-grapes",
+    name: "Little Bear's Sweet Grapes",
+    maker: "",
+    category: "sweet",
+    price: 8.5,
+    size: "16 oz jar",
+    badges: ["Seasonal"],
+    image: "images/Grapes.png",
+    desc: "Sweet, jarred whole grapes — the pantry snack nobody expects until they try it.",
+    comingSoon: false
   },
 
   /* ---------- Pickled & Preserved ---------- */
   {
     slug: "cowboy-candy",
-    name: "Cowboy Candy",
-    maker: "",
+    name: "Mama Bear's Cowboy Candy",
+    maker: "mama",
     category: "pickled",
+    price: 9.5,
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/CowboyCandy.jpeg",
     desc: "Candied jalapeños — sweet, hot, and gone in a hurry on crackers with cream cheese.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "pickled-beets",
-    name: "Pickled Beets",
-    maker: "",
+    name: "Mama Bear's Pickled Beets",
+    maker: "mama",
     category: "pickled",
+    price: 8.5,
     size: "16 oz jar",
     badges: ["Seasonal"],
     image: "images/PickledBeets.jpeg",
     desc: "Earthy, tangy, and exactly the kind of jar that disappears at a family potluck.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "pickled-carrots",
-    name: "Pickled Carrots",
-    maker: "",
+    name: "Mama Bear's Pickled Carrots",
+    maker: "mama",
     category: "pickled",
+    price: 8,
     size: "16 oz jar",
     badges: ["Seasonal"],
     image: "images/PickledCarrots.jpeg",
     desc: "Crisp, tangy, and dangerously snackable straight out of the jar.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "pickled-sweet-peppers",
-    name: "Pickled Sweet Peppers",
-    maker: "",
+    name: "Papa Bear's Pickled Sweet Peppers",
+    maker: "papa",
     category: "pickled",
+    price: 8.5,
     size: "16 oz jar",
     badges: ["Seasonal"],
     image: "images/PickledSweetPeppers.jpeg",
     desc: "Sweet, tangy, and the kind of thing you keep meaning to save for a sandwich and never do.",
-    comingSoon: true
+    comingSoon: false
   },
 
   /* ---------- Pantry Goods ---------- */
   {
     slug: "sweet-cherries",
-    name: "Sweet Cherries",
-    maker: "",
+    name: "Mama Bear's Sweet Cherries",
+    maker: "mama",
     category: "pantry",
+    price: 9,
     size: "16 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/SweetCherries.jpeg",
     desc: "Put up sweet and simple — good on their own, better over a bowl of vanilla ice cream.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "apple-pie-filling",
-    name: "Apple Pie Filling",
-    maker: "",
+    name: "Papa Bear's Apple Pie Filling",
+    maker: "papa",
     category: "pantry",
+    price: 9,
     size: "16 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/ApplePieFilling.jpg",
     desc: "Ready for a pie you didn't have to peel and slice for yourself — Mama Bear already did that part.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "grizzly-good-applesauce",
-    name: "Grizzly Good Applesauce",
-    maker: "",
+    name: "Papa Bear's Grizzly Good Applesauce",
+    maker: "papa",
     category: "pantry",
+    price: 7.5,
     size: "16 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/GrizzyGoodApplesauce.jpeg",
     desc: "No added nonsense, just good applesauce — the name is the whole pitch.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "dinner-carrots",
-    name: "Dinner Carrots",
+    name: "Homestyle Dinner Carrots",
     maker: "",
     category: "pantry",
-    size: "16 oz jar",
+    price: 9.5,
+    size: "24 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/DinnerCarrots.jpeg",
     desc: "Simple canned carrots, ready for the table with nothing else required.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "pinto-beans",
     name: "Pinto Beans",
     maker: "",
     category: "pantry",
+    price: 6.5,
     size: "16 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/PintoBeans.jpeg",
     desc: "Home-canned pinto beans, ready to heat and eat whenever the pantry's doing the cooking.",
-    comingSoon: true
+    comingSoon: false
+  },
+  {
+    slug: "navy-beans",
+    name: "Navy Beans",
+    maker: "",
+    category: "pantry",
+    price: 6.5,
+    size: "16 oz jar",
+    badges: ["Pantry Favorite"],
+    image: "images/NavyBeans.png",
+    desc: "Home-canned navy beans — soft, simple, and ready whenever soup weather hits.",
+    comingSoon: false
   },
   {
     slug: "dried-onions",
     name: "Dried Onions",
     maker: "",
     category: "pantry",
+    price: 5.5,
     size: "4 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/DriedOnions.jpeg",
     desc: "Dehydrated and ready for soups, stews, or anything that needs a little more onion in it.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "breadcrumbs",
-    name: "Breadcrumbs",
+    name: "Homemade Breadcrumbs",
     maker: "",
     category: "pantry",
+    price: 5.5,
     size: "8 oz jar",
     badges: ["Pantry Favorite"],
     image: "images/BreadCrumbs.jpeg",
     desc: "Homemade, seasoned, and better than the canister kind by a mile.",
-    comingSoon: true
+    comingSoon: false
   },
   {
     slug: "italian-dressing",
-    name: "Italian Dressing",
-    maker: "",
+    name: "Papa Bear's Favorite Italian Dressing",
+    maker: "papa",
     category: "pantry",
-    size: "8 oz bottle",
+    price: 8.5,
+    size: "16 fl oz bottle",
     badges: ["Pantry Favorite"],
     image: "images/ItalianDressing.jpeg",
     desc: "Made from scratch, no mystery ingredients — just the good stuff in a bottle.",
-    comingSoon: true
+    comingSoon: false
   },
 
-  /* ---------- Seasonal Specialties ---------- */
+  /* ---------- Seasonal Specialties (still coming soon) ---------- */
   {
-    slug: "candied-mixed-nuts",
-    name: "Candied Mixed Nuts",
+    slug: "candied-pecans",
+    name: "Mama & Papa Bear's Candied Pecans",
     maker: "",
     category: "seasonal",
+    price: 11.99,
+    size: "12 oz jar",
+    badges: ["Seasonal"],
+    image: "images/CandiedPecans.jpeg",
+    desc: "Sweet, crunchy, and dangerous to leave unattended on the counter.",
+    comingSoon: true
+  },
+  {
+    slug: "candied-walnuts",
+    name: "Mama Bear's Candied Walnuts",
+    maker: "mama",
+    category: "seasonal",
+    price: 11.49,
+    size: "12 oz jar",
+    badges: ["Seasonal"],
+    image: "images/CandiedWalnuts.jpeg",
+    desc: "Toasty, sweet, and just as good on a salad as they are straight out of the jar.",
+    comingSoon: true
+  },
+  {
+    slug: "candied-almonds",
+    name: "Candied Almonds",
+    maker: "",
+    category: "seasonal",
+    price: 11.49,
+    size: "12 oz jar",
+    badges: ["Seasonal"],
+    image: "images/CandiedAlmonds.jpeg",
+    desc: "Crisp, sweet, and lightly spiced — the snack that never makes it home from the car.",
+    comingSoon: true
+  },
+  {
+    slug: "spicy-mixed-nuts",
+    name: "Spicy Mixed Nuts",
+    maker: "",
+    category: "seasonal",
+    price: 9.5,
     size: "8 oz bag",
     badges: ["Seasonal"],
     image: "images/MixedNuts.png",
-    desc: "Pecans, walnuts, and almonds candied sweet, spicy, or both — Mama Bear won't pick a favorite.",
+    desc: "Pecans, walnuts, and almonds, candied with real heat — Mama Bear's answer to \"got anything spicy?\"",
     comingSoon: true
   },
   {
-    slug: "chocolate-peanut-butter-fudge",
-    name: "Chocolate & Peanut Butter Fudge",
+    slug: "chocolate-fudge",
+    name: "Chocolate Fudge",
     maker: "",
     category: "seasonal",
+    price: 9,
     size: "1/2 lb box",
     badges: ["Seasonal"],
     image: "images/ChocolateFudge.png",
-    desc: "A seasonal batch made in small runs — can also be made to order if you ask ahead.",
+    desc: "Rich, dense, made in small batches — and yes, it can be made to order if you ask ahead.",
+    comingSoon: true
+  },
+  {
+    slug: "peanut-butter-fudge",
+    name: "Peanut Butter Fudge",
+    maker: "",
+    category: "seasonal",
+    price: 9,
+    size: "1/2 lb box",
+    badges: ["Seasonal"],
+    image: "images/PeanutButterFudge.png",
+    desc: "Smooth, rich, and just as make-to-order-able as its chocolate cousin.",
     comingSoon: true
   },
 
@@ -310,11 +412,5 @@ const CATEGORY_LABELS = {
   gift: "Gift Sets"
 };
 
-/* The couple of items with no dedicated photo yet — a plain list
-   instead of a fake product card. */
-const PANTRY_LIST = [
-  {
-    group: "Also In The Pantry",
-    items: ["Canned Grapes", "Navy Beans"]
-  }
-];
+/* Nothing left with no photo — every real item now has a card. */
+const PANTRY_LIST = [];
