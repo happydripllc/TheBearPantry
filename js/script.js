@@ -603,11 +603,22 @@
     });
   }
 
-  /* ---------- Forms (progressive — no backend yet) ---------- */
+  /* ---------- Forms (newsletter signup submits to Zoho; others still local-only) ---------- */
+  function ensureZohoFrame() {
+    if (document.querySelector('iframe[name="zohoNewsletterFrame"]')) return;
+    var frame = document.createElement("iframe");
+    frame.name = "zohoNewsletterFrame";
+    frame.style.display = "none";
+    frame.setAttribute("aria-hidden", "true");
+    document.body.appendChild(frame);
+  }
   function initForms() {
+    ensureZohoFrame();
     document.querySelectorAll("form[data-brand-form]:not(#checkoutForm):not(#contactForm)").forEach(function (form) {
       form.addEventListener("submit", function (e) {
-        e.preventDefault();
+        // Newsletter forms have a real action/target (see HTML) and actually
+        // submit to Zoho via the hidden iframe — don't block that submission.
+        if (!form.hasAttribute("data-newsletter-form")) e.preventDefault();
         var successMsg = form.getAttribute("data-success") || "Thanks — we got it!";
         var wrap = document.createElement("div");
         wrap.className = "form-note";
