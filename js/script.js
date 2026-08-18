@@ -334,9 +334,69 @@
     }).join("");
   }
 
+  /* ---------- Checkout: submits the cart to /api/order (see src/worker.js) ---------- */
+  function initCheckoutForm() {
+    var form = document.getElementById("checkoutForm");
+    if (!form) return;
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var cart = getCart();
+      if (cart.length === 0) return;
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      var originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+
+      var payload = {
+        customer: {
+          name: form.fullName.value,
+          phone: form.phone.value,
+          email: form.email.value
+        },
+        fulfillment: form.fulfillment.value,
+        notes: form.notes.value,
+        items: cart
+      };
+
+      fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (!result.ok || !result.data.ok) {
+            throw new Error((result.data && result.data.error) || "Something went wrong sending your order.");
+          }
+          var wrap = document.createElement("div");
+          wrap.className = "form-note";
+          wrap.style.marginTop = "18px";
+          wrap.innerHTML = "<strong>Got it! Mama Bear (or someone on her behalf) will reach out shortly to confirm your order and arrange pickup.</strong>";
+          form.appendChild(wrap);
+          form.querySelectorAll("input, textarea, select, button[type=submit]").forEach(function (f) { f.disabled = true; });
+          clearCart();
+        })
+        .catch(function (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          var wrap = document.createElement("div");
+          wrap.className = "form-note";
+          wrap.style.borderColor = "var(--rust)";
+          wrap.style.marginTop = "18px";
+          wrap.innerHTML = "<strong>" + err.message + " Please try again, or reach out through the Contact page.</strong>";
+          form.appendChild(wrap);
+        });
+    });
+  }
+
   /* ---------- Forms (progressive — no backend yet) ---------- */
   function initForms() {
-    document.querySelectorAll("form[data-brand-form]").forEach(function (form) {
+    document.querySelectorAll("form[data-brand-form]:not(#checkoutForm)").forEach(function (form) {
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var successMsg = form.getAttribute("data-success") || "Thanks — we got it!";
@@ -345,7 +405,6 @@
         wrap.style.marginTop = "18px";
         wrap.innerHTML = "<strong>" + successMsg + "</strong>";
         form.appendChild(wrap);
-        if (form.id === "checkoutForm") { clearCart(); }
         form.querySelectorAll("input, textarea, select, button[type=submit]").forEach(function (f) { f.disabled = true; });
       });
     });
@@ -374,6 +433,7 @@
     initPantryList();
     initPDP();
     initRelated();
+    initCheckoutForm();
     initForms();
     updateCartBadge();
     renderCartPage();

@@ -1,0 +1,9 @@
+{
+  "name": "thebearpantry",
+  "compatibility_date": "2026-08-01",
+  "main": "src/worker.js",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS"
+  }
+}
