@@ -89,6 +89,21 @@
           </label>
         </div>
 
+        <div id="deliveryAddressFields" class="form-grid" style="display:none;margin-top:18px;">
+          <div class="field full">
+            <label for="addrStreet">Delivery Address</label>
+            <input type="text" id="addrStreet" name="addrStreet" placeholder="Street address" />
+          </div>
+          <div class="field">
+            <label for="addrCity">City</label>
+            <input type="text" id="addrCity" name="addrCity" />
+          </div>
+          <div class="field">
+            <label for="addrZip">ZIP Code</label>
+            <input type="text" id="addrZip" name="addrZip" inputmode="numeric" />
+          </div>
+        </div>
+
         <div class="field full" style="margin-top:22px;">
           <label for="notes">Notes for Mama Bear (optional)</label>
           <textarea id="notes" name="notes" placeholder="Preferred pickup day, gift notes, allergy questions, anything else."></textarea>
@@ -126,6 +141,6 @@
 
 <div class="toast" id="toast"></div>
 <script src="js/products.js?v=2"></script>
-<script src="js/script.js?v=2"></script>
+<script src="js/script.js?v=3"></script>
 </body>
 </html>

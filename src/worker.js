@@ -32,6 +32,7 @@ async function handleOrder(request, env) {
   const fulfillment = (data && data.fulfillment) || "pickup";
   const notes = (data && data.notes) || "";
   const items = (data && data.items) || [];
+  const deliveryAddress = (data && data.deliveryAddress) || null;
 
   if (!customer.name || !customer.email || !customer.phone) {
     return jsonResponse({ ok: false, error: "Name, email, and phone are all required." }, 400);
@@ -39,9 +40,15 @@ async function handleOrder(request, env) {
   if (!Array.isArray(items) || items.length === 0) {
     return jsonResponse({ ok: false, error: "Your pantry cart is empty." }, 400);
   }
+  if (fulfillment === "delivery" && (!deliveryAddress || !deliveryAddress.street || !deliveryAddress.city || !deliveryAddress.zip)) {
+    return jsonResponse({ ok: false, error: "A full delivery address (street, city, ZIP) is required for local delivery." }, 400);
+  }
   if (!env.RESEND_API_KEY) {
     return jsonResponse({ ok: false, error: "Order email isn't configured yet — missing RESEND_API_KEY." }, 500);
   }
+
+  const addressLine = deliveryAddress ? (deliveryAddress.street + ", " + deliveryAddress.city + " " + deliveryAddress.zip) : "";
+  const mapsUrl = deliveryAddress ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(addressLine) : "";
 
   const subtotal = items.reduce(function (sum, i) {
     return sum + (Number(i.price) || 0) * (Number(i.qty) || 0);
@@ -65,6 +72,10 @@ async function handleOrder(request, env) {
     "<p><strong>" + escapeHtml(customer.name) + "</strong><br>" +
     escapeHtml(customer.email) + "<br>" + escapeHtml(customer.phone) + "</p>" +
     "<p><strong>Fulfillment:</strong> " + escapeHtml(fulfillment) + "</p>" +
+    (deliveryAddress
+      ? "<p><strong>Delivery Address:</strong> " + escapeHtml(addressLine) +
+        ' &mdash; <a href="' + mapsUrl + '">Open in Google Maps</a></p>'
+      : "") +
     (notes ? "<p><strong>Notes:</strong> " + escapeHtml(notes) + "</p>" : "") +
     '<table style="width:100%;border-collapse:collapse;margin-top:16px;">' +
     itemRowsHtml +
@@ -78,6 +89,7 @@ async function handleOrder(request, env) {
     "New Pantry Order Request\n\n" +
     customer.name + "\n" + customer.email + "\n" + customer.phone + "\n\n" +
     "Fulfillment: " + fulfillment + "\n" +
+    (deliveryAddress ? "Delivery Address: " + addressLine + "\nMap: " + mapsUrl + "\n\n" : "") +
     (notes ? "Notes: " + notes + "\n\n" : "\n") +
     items.map(function (i) {
       return i.qty + " x " + i.name + (i.size ? " (" + i.size + ")" : "") + " — $" + ((Number(i.price) || 0) * (Number(i.qty) || 0)).toFixed(2);

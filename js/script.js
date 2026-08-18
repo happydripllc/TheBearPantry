@@ -338,6 +338,25 @@
   function initCheckoutForm() {
     var form = document.getElementById("checkoutForm");
     if (!form) return;
+
+    var addressWrap = document.getElementById("deliveryAddressFields");
+    var addrStreet = document.getElementById("addrStreet");
+    var addrCity = document.getElementById("addrCity");
+    var addrZip = document.getElementById("addrZip");
+
+    function syncDeliveryAddressFields() {
+      if (!addressWrap) return;
+      var isDelivery = form.fulfillment.value === "delivery";
+      addressWrap.style.display = isDelivery ? "grid" : "none";
+      [addrStreet, addrCity, addrZip].forEach(function (f) {
+        if (f) f.required = isDelivery;
+      });
+    }
+    form.querySelectorAll('input[name="fulfillment"]').forEach(function (radio) {
+      radio.addEventListener("change", syncDeliveryAddressFields);
+    });
+    syncDeliveryAddressFields();
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var cart = getCart();
@@ -358,6 +377,13 @@
         notes: form.notes.value,
         items: cart
       };
+      if (form.fulfillment.value === "delivery") {
+        payload.deliveryAddress = {
+          street: addrStreet ? addrStreet.value : "",
+          city: addrCity ? addrCity.value : "",
+          zip: addrZip ? addrZip.value : ""
+        };
+      }
 
       fetch("/api/order", {
         method: "POST",
