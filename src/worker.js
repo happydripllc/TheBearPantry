@@ -20,6 +20,14 @@ export default {
       return handleContact(request, env);
     }
 
+    if (url.pathname === "/api/inventory" && request.method === "GET") {
+      return handleGetInventory(env);
+    }
+
+    if (url.pathname === "/api/inventory" && request.method === "POST") {
+      return handleUpdateInventory(request, env);
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
@@ -103,6 +111,40 @@ async function handleOrder(request, env) {
   }
   if (!env.RESEND_API_KEY) {
     return jsonResponse({ ok: false, error: "Order email isn't configured yet — missing RESEND_API_KEY." }, 500);
+  }
+
+  // Re-check stock against KV at checkout — never trust the page-load fetch
+  // alone, since stock can change between when the shopper loaded the page
+  // and when they check out. Untracked products (no entry in the stock map)
+  // are always allowed. KV has no transactions, so there's a small race
+  // window if two orders for the same low-stock item land at the exact same
+  // moment — acceptable at this business's order volume.
+  const stock = await getStock(env);
+  const shortfalls = [];
+  for (const item of items) {
+    const available = stock[item.slug];
+    if (available == null) continue;
+    const qty = Number(item.qty) || 0;
+    if (qty > available) {
+      shortfalls.push({ name: item.name, requested: qty, available: available });
+    }
+  }
+  if (shortfalls.length > 0) {
+    const detail = shortfalls.map(function (s) {
+      return s.name + " (" + s.available + " left, " + s.requested + " requested)";
+    }).join("; ");
+    return jsonResponse({
+      ok: false,
+      error: "Some items in your cart sold out before checkout: " + detail + ". Please update your cart and try again.",
+      shortfalls: shortfalls
+    }, 409);
+  }
+  for (const item of items) {
+    if (stock[item.slug] == null) continue;
+    stock[item.slug] -= (Number(item.qty) || 0);
+  }
+  if (env.INVENTORY_KV) {
+    await env.INVENTORY_KV.put(STOCK_KEY, JSON.stringify(stock));
   }
 
   const addressLine = deliveryAddress ? (deliveryAddress.street + ", " + deliveryAddress.city + " " + deliveryAddress.zip) : "";
@@ -223,6 +265,63 @@ async function handleOrder(request, env) {
   }
 
   return jsonResponse({ ok: true });
+}
+
+/* ---------- Inventory (Cloudflare KV) ----------
+   All stock counts live under one KV key as a single JSON object, e.g.
+   { "papa-bears-smokey-jalapeno-salsa": 20 }. A product with no entry here
+   is untracked and always shown as available — tracking is opt-in per
+   product via the admin page, not automatic for the whole catalog. */
+const STOCK_KEY = "stock";
+
+async function getStock(env) {
+  if (!env.INVENTORY_KV) return {};
+  const stock = await env.INVENTORY_KV.get(STOCK_KEY, "json");
+  return stock || {};
+}
+
+async function handleGetInventory(env) {
+  const stock = await getStock(env);
+  return jsonResponse({ ok: true, stock: stock });
+}
+
+async function handleUpdateInventory(request, env) {
+  if (!env.INVENTORY_KV) {
+    return jsonResponse({ ok: false, error: "Inventory isn't set up yet — missing the INVENTORY_KV binding." }, 500);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ ok: false, error: "Inventory admin isn't configured yet — missing ADMIN_KEY." }, 500);
+  }
+  const providedKey = request.headers.get("X-Admin-Key") || "";
+  if (providedKey !== env.ADMIN_KEY) {
+    return jsonResponse({ ok: false, error: "Not authorized." }, 401);
+  }
+
+  let data;
+  try {
+    data = await request.json();
+  } catch (err) {
+    return jsonResponse({ ok: false, error: "Invalid request body." }, 400);
+  }
+
+  const updates = (data && data.updates) || {};
+  const stock = await getStock(env);
+
+  for (const slug of Object.keys(updates)) {
+    const value = updates[slug];
+    if (value === null) {
+      delete stock[slug];
+      continue;
+    }
+    const count = Number(value);
+    if (!Number.isInteger(count) || count < 0) {
+      return jsonResponse({ ok: false, error: 'Stock count for "' + slug + '" must be a whole number 0 or greater.' }, 400);
+    }
+    stock[slug] = count;
+  }
+
+  await env.INVENTORY_KV.put(STOCK_KEY, JSON.stringify(stock));
+  return jsonResponse({ ok: true, stock: stock });
 }
 
 async function sendResendEmail(env, payload) {

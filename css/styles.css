@@ -160,6 +160,7 @@ p { margin: 0; }
 .badge-seasonal { background: var(--honey-deep); }
 .badge-batch { background: var(--brown); }
 .badge-soon { background: transparent; border: 1.5px solid var(--parchment-line); color: var(--ink-soft); }
+.badge-soldout { background: transparent; border: 1.5px solid var(--rust); color: var(--rust); }
 .badge-outline { background: transparent; border: 1.5px solid rgba(38,64,43,0.35); color: var(--forest); }
 
 /* ---------- Announcement bar ---------- */
@@ -387,6 +388,7 @@ p { margin: 0; }
 .add-cart-btn svg { width: 18px; height: 18px; }
 .product-card.soon .product-media { filter: grayscale(0.15) brightness(0.97); }
 .product-card.soon .add-cart-btn { background: var(--brown); cursor: default; }
+.product-card.sold-out .add-cart-btn { background: var(--brown); cursor: default; }
 
 /* ---------- Story / split sections ---------- */
 .split {

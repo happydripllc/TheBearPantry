@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Inventory — The Bear Pantry</title>
+<link rel="icon" href="images/TBPlogo-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css?v=8" />
+<style>
+  /* Admin-only layout — not part of the public design system, kept local to this page. */
+  body { background: var(--cream); }
+  .admin-wrap { max-width: 760px; margin: 0 auto; padding: 40px 24px 100px; }
+  .admin-header { margin-bottom: 28px; }
+  .admin-header h1 { font-size: 1.8rem; }
+  .admin-header p { color: var(--ink-soft); margin-top: 8px; font-size: 0.92rem; }
+  .key-gate {
+    background: var(--surface); border-radius: var(--radius-md); padding: 22px 24px;
+    box-shadow: var(--shadow-soft); margin-bottom: 24px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .key-gate label { font-size: 0.86rem; font-weight: 700; color: var(--forest); white-space: nowrap; }
+  .key-gate input[type="password"] {
+    flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 8px;
+    border: 1.5px solid var(--parchment-line); font-family: var(--font-body);
+  }
+  .key-status { font-size: 0.82rem; }
+  .key-status.ok { color: var(--forest); }
+  .key-status.bad { color: var(--rust); }
+  .inv-table { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-soft); overflow: hidden; }
+  .inv-row {
+    display: grid; grid-template-columns: 52px 1fr 110px; gap: 14px; align-items: center;
+    padding: 12px 18px; border-bottom: 1px solid var(--parchment-line);
+  }
+  .inv-row:last-child { border-bottom: none; }
+  .inv-row img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--cream-deep); }
+  .inv-name { font-weight: 600; font-size: 0.94rem; }
+  .inv-meta { font-size: 0.76rem; color: var(--ink-soft); margin-top: 2px; }
+  .inv-row input[type="number"] {
+    width: 100%; padding: 9px 10px; border-radius: 8px; border: 1.5px solid var(--parchment-line);
+    text-align: center; font-family: var(--font-body);
+  }
+  .inv-row.dirty input[type="number"] { border-color: var(--rust); }
+  .admin-actions { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+  .save-status { font-size: 0.88rem; }
+  .save-status.ok { color: var(--forest); }
+  .save-status.bad { color: var(--rust); }
+  .fallback-note { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--parchment-line); font-size: 0.84rem; color: var(--ink-soft); }
+  .fallback-note code { background: var(--cream-deep); padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body data-depth="0">
+
+<div class="admin-wrap">
+  <div class="admin-header">
+    <h1>Pantry Inventory</h1>
+    <p>Leave a jar's count blank for "always available" (untracked). Set a number to start enforcing stock — the shop will show it as Sold Out and checkout will reject orders once it hits 0.</p>
+  </div>
+
+  <div class="key-gate">
+    <label for="adminKeyInput">Admin key</label>
+    <input type="password" id="adminKeyInput" placeholder="Paste your ADMIN_KEY" autocomplete="off" />
+    <span class="key-status" id="keyStatus"></span>
+  </div>
+
+  <div class="inv-table" id="invTable"><p style="padding:20px;color:var(--ink-soft);">Loading products…</p></div>
+
+  <div class="admin-actions">
+    <button class="btn btn-primary" id="saveBtn">Save Changes</button>
+    <span class="save-status" id="saveStatus"></span>
+  </div>
+
+  <div class="fallback-note">
+    <strong>Fallback:</strong> if this page ever won't load, stock counts live in the Cloudflare dashboard too —
+    Workers &amp; Pages → your Worker → Settings → Bindings → the <code>INVENTORY_KV</code> namespace → KV → click into it,
+    and edit the <code>stock</code> key's value directly (it's one JSON object like <code>{"slug-name": 20}</code>).
+  </div>
+</div>
+
+<script src="js/products.js?v=6"></script>
+<script>
+(function () {
+  "use strict";
+  var KEY_STORAGE = "bearPantryAdminKey";
+  var table = document.getElementById("invTable");
+  var keyInput = document.getElementById("adminKeyInput");
+  var keyStatus = document.getElementById("keyStatus");
+  var saveBtn = document.getElementById("saveBtn");
+  var saveStatus = document.getElementById("saveStatus");
+  var currentStock = {};
+
+  var savedKey = localStorage.getItem(KEY_STORAGE);
+  if (savedKey) keyInput.value = savedKey;
+  keyInput.addEventListener("input", function () {
+    localStorage.setItem(KEY_STORAGE, keyInput.value);
+    keyStatus.textContent = "";
+    keyStatus.className = "key-status";
+  });
+
+  function renderTable() {
+    table.innerHTML = PRODUCTS.map(function (p) {
+      var val = currentStock[p.slug];
+      return (
+        '<div class="inv-row" data-slug="' + p.slug + '">' +
+        '<img src="' + p.image + '" alt="" />' +
+        '<div><div class="inv-name">' + p.name + "</div>" +
+        '<div class="inv-meta">' + p.slug + (p.comingSoon ? " · coming soon (not purchasable yet)" : "") + "</div></div>" +
+        '<input type="number" min="0" step="1" placeholder="Unlimited" value="' + (val != null ? val : "") + '" />' +
+        "</div>"
+      );
+    }).join("");
+  }
+
+  function loadInventory() {
+    fetch("/api/inventory")
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        currentStock = (data && data.stock) || {};
+        renderTable();
+      })
+      .catch(function () {
+        table.innerHTML = '<p style="padding:20px;color:var(--rust);">Couldn\'t load current stock — check your connection and reload.</p>';
+      });
+  }
+
+  saveBtn.addEventListener("click", function () {
+    var key = keyInput.value.trim();
+    if (!key) {
+      keyStatus.textContent = "Enter your admin key first.";
+      keyStatus.className = "key-status bad";
+      return;
+    }
+    var updates = {};
+    table.querySelectorAll(".inv-row").forEach(function (row) {
+      var slug = row.getAttribute("data-slug");
+      var raw = row.querySelector("input").value.trim();
+      updates[slug] = raw === "" ? null : parseInt(raw, 10);
+    });
+
+    saveBtn.disabled = true;
+    saveStatus.textContent = "Saving…";
+    saveStatus.className = "save-status";
+
+    fetch("/api/inventory", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Admin-Key": key },
+      body: JSON.stringify({ updates: updates })
+    })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        saveBtn.disabled = false;
+        if (!result.ok || !result.data.ok) {
+          throw new Error((result.data && result.data.error) || "Save failed.");
+        }
+        currentStock = result.data.stock || {};
+        renderTable();
+        keyStatus.textContent = "Key accepted";
+        keyStatus.className = "key-status ok";
+        saveStatus.textContent = "Saved just now.";
+        saveStatus.className = "save-status ok";
+      })
+      .catch(function (err) {
+        saveBtn.disabled = false;
+        saveStatus.textContent = err.message;
+        saveStatus.className = "save-status bad";
+        if (/not authorized/i.test(err.message)) {
+          keyStatus.textContent = "Wrong key";
+          keyStatus.className = "key-status bad";
+        }
+      });
+  });
+
+  loadInventory();
+})();
+</script>
+</body>
+</html>

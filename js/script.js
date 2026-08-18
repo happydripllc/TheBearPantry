@@ -30,10 +30,28 @@
   function findProduct(slug) {
     return (typeof PRODUCTS !== "undefined" ? PRODUCTS : []).filter(function (p) { return p.slug === slug; })[0];
   }
+
+  /* ---------- Inventory (live stock from /api/inventory) ----------
+     A product with no entry in the fetched stock map is untracked and
+     always treated as available — inventory tracking is opt-in per
+     product (set in the admin page), not automatic for the whole catalog. */
+  var STOCK = {};
+  var stockListeners = [];
+  function onStockLoaded(fn) { stockListeners.push(fn); }
+  function stockFor(slug) { return STOCK[slug]; }
+  function isSoldOut(p) { return !p.comingSoon && stockFor(p.slug) === 0; }
+  function fetchInventory() {
+    return fetch("/api/inventory")
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) { if (data && data.ok && data.stock) STOCK = data.stock; })
+      .catch(function () { /* offline/misconfigured — everything just stays available */ })
+      .then(function () { stockListeners.forEach(function (fn) { fn(); }); });
+  }
+
   function addToCart(slug, qty) {
     qty = qty || 1;
     var product = findProduct(slug);
-    if (!product || product.comingSoon) return;
+    if (!product || product.comingSoon || isSoldOut(product)) return;
     var cart = getCart();
     var line = cart.filter(function (i) { return i.slug === slug; })[0];
     if (line) {
@@ -112,18 +130,23 @@
   }
   function productCardHTML(p, base) {
     base = base || "";
+    var soldOut = isSoldOut(p);
     var detail = p.detail || ("shop/product.html?slug=" + p.slug);
     var link = p.comingSoon ? "javascript:void(0)" : base + detail;
     var badges = p.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
-    var soonBadge = p.comingSoon ? '<span class="badge badge-soon">Coming Soon</span>' : "";
+    var soonBadge = p.comingSoon
+      ? '<span class="badge badge-soon">Coming Soon</span>'
+      : soldOut ? '<span class="badge badge-soldout">Sold Out</span>' : "";
     var priceHTML = (p.price != null)
       ? '<span class="product-price">$' + p.price.toFixed(2) + ' <span class="size">' + p.size + "</span></span>"
       : '<span class="product-price">Coming soon</span>';
     var cartBtn = p.comingSoon
       ? '<button class="add-cart-btn" title="Mama Bear needs to make another batch" disabled>' + bellIcon() + "</button>"
+      : soldOut
+      ? '<button class="add-cart-btn" title="Sold out — check back soon" disabled>' + bellIcon() + "</button>"
       : '<button class="add-cart-btn" title="Add to cart" onclick="event.preventDefault();BearPantry.addToCart(\'' + p.slug + "', 1)\">" + cartIcon() + "</button>";
     return (
-      '<article class="product-card' + (p.comingSoon ? " soon" : "") + '">' +
+      '<article class="product-card' + (p.comingSoon ? " soon" : "") + (soldOut ? " sold-out" : "") + '">' +
       '<a href="' + link + '" class="product-media" ' + (p.comingSoon ? 'onclick="return false;"' : "") + '>' +
       '<img src="' + base + p.image + '" alt="' + p.name + '" loading="lazy" />' +
       '<div class="product-badges">' + badges + soonBadge + "</div>" +
@@ -154,14 +177,18 @@
     var base = document.body.getAttribute("data-depth") === "1" ? "../" : "";
     var detail = product.detail || ("shop/product.html?slug=" + product.slug);
     var badges = product.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
+    var soldOut = isSoldOut(product);
+    var addBtnHTML = soldOut
+      ? '<button class="btn btn-primary" disabled>Sold Out — Check Back Soon</button>'
+      : '<button class="btn btn-primary" onclick="BearPantry.addToCart(\'' + product.slug + "', 1); BearPantry.closeQuickView();\">Add to Cart</button>";
     body.innerHTML =
       '<span class="pdp-maker">' + (product.maker === "mama" ? "Mama Bear's" : product.maker === "papa" ? "Papa Bear's" : "The Bear Pantry") + "</span>" +
       "<h2 class=\"pdp-title\" style=\"font-size:1.7rem\">" + product.name + "</h2>" +
       '<div class="pdp-price">$' + product.price.toFixed(2) + ' <span class="size">' + product.size + "</span></div>" +
       '<p class="pdp-desc">' + product.desc + "</p>" +
-      '<div class="pdp-badges">' + badges + "</div>" +
+      '<div class="pdp-badges">' + badges + (soldOut ? '<span class="badge badge-soldout">Sold Out</span>' : "") + "</div>" +
       '<div class="hero-ctas">' +
-      '<button class="btn btn-primary" onclick="BearPantry.addToCart(\'' + product.slug + "', 1); BearPantry.closeQuickView();\">Add to Cart</button>" +
+      addBtnHTML +
       '<a class="btn btn-secondary" href="' + base + detail + '">Full Details</a>' +
       "</div>";
     document.getElementById("quickViewImg").src = base + product.image;
@@ -285,6 +312,7 @@
     var sortSelect = document.getElementById("shopSort");
     if (sortSelect) sortSelect.addEventListener("change", function () { state.sort = this.value; render(); });
 
+    onStockLoaded(render);
     render();
   }
 
@@ -293,7 +321,11 @@
     var el = document.getElementById("featuredGrid");
     if (!el) return;
     var slugs = ["papa-bears-smokey-jalapeno-salsa", "mama-bears-bread-and-butter-pickles", "papa-bears-classic-green-beans", "mama-bears-blackberry-jam"];
-    el.innerHTML = slugs.map(function (s) { return productCardHTML(findProduct(s)); }).join("");
+    function render() {
+      el.innerHTML = slugs.map(function (s) { return productCardHTML(findProduct(s)); }).join("");
+    }
+    onStockLoaded(render);
+    render();
   }
 
   /* ---------- Generic product page (shop/product.html?slug=...) ---------- */
@@ -419,6 +451,21 @@
   }
 
   /* ---------- Product detail page: qty stepper + add to cart ---------- */
+  function applyPDPStockState() {
+    // Works for both the generic template and the bespoke static PDP pages —
+    // both end up with #pdpAddBtn[data-slug] set before this runs. Coming
+    // Soon products never get a data-slug (see initGenericProductPage), so
+    // this only ever touches purchasable products.
+    var addBtn = document.getElementById("pdpAddBtn");
+    if (!addBtn) return;
+    var slug = addBtn.getAttribute("data-slug");
+    if (!slug) return;
+    var product = findProduct(slug);
+    if (!product || product.comingSoon) return;
+    var soldOut = isSoldOut(product);
+    addBtn.disabled = soldOut;
+    addBtn.textContent = soldOut ? "Sold Out — Check Back Soon" : "Add to Cart";
+  }
   function initPDP() {
     var stepper = document.getElementById("pdpQtyStepper");
     var qtyEl = document.getElementById("pdpQty");
@@ -433,15 +480,21 @@
     addBtn.addEventListener("click", function () {
       addToCart(addBtn.getAttribute("data-slug"), parseInt(qtyEl.textContent, 10));
     });
+    applyPDPStockState();
+    onStockLoaded(applyPDPStockState);
   }
 
   /* ---------- Related products (product detail pages) ---------- */
   function initRelated() {
     var el = document.getElementById("relatedGrid");
     if (!el) return;
-    var exclude = el.getAttribute("data-exclude");
-    var list = PRODUCTS.filter(function (p) { return p.slug !== exclude; }).slice(0, 4);
-    el.innerHTML = list.map(function (p) { return productCardHTML(p, "../"); }).join("");
+    function render() {
+      var exclude = el.getAttribute("data-exclude");
+      var list = PRODUCTS.filter(function (p) { return p.slug !== exclude; }).slice(0, 4);
+      el.innerHTML = list.map(function (p) { return productCardHTML(p, "../"); }).join("");
+    }
+    onStockLoaded(render);
+    render();
   }
 
   /* ---------- Pantry list (flavors without dedicated photography yet) ---------- */
@@ -694,6 +747,7 @@
     updateCartBadge();
     renderCartPage();
     renderCheckoutSummary();
+    fetchInventory();
 
     var overlay = document.getElementById("quickViewOverlay");
     if (overlay) {
