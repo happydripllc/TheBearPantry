@@ -23,6 +23,7 @@ const PRODUCTS = [
     heat: "Medium",
     badges: ["Small Batch", "Papa Bear's Pick"],
     image: "images/papa-bears-smokey-jalapeno-salsa.png",
+    gallery: ["images/JalapenoSalsaOnGrill.jpg", "images/JalapenoSalsa.jpg"],
     desc: "Roasted jalapeños, ripe tomatoes, and a slow-smoked kick. Papa Bear's favorite way to clear a sinus.",
     ingredients: "Tomatoes, jalapeños, onion, garlic, cilantro, lime, salt, smoked paprika.",
     comingSoon: false,
@@ -67,6 +68,7 @@ const PRODUCTS = [
     size: "8 oz jar",
     badges: ["Seasonal", "Small Batch"],
     image: "images/BlackberryJam.jpeg",
+    gallery: ["images/BlackberryJamToast.jpg"],
     desc: "Wild blackberries, slow-simmered until Mama Bear decides it's ready — usually when the kitchen smells right.",
     comingSoon: false
   },
@@ -165,6 +167,7 @@ const PRODUCTS = [
     size: "8 oz jar",
     badges: ["Seasonal"],
     image: "images/CowboyCandy.jpeg",
+    gallery: ["images/PineappleSalsa.jpg"], // misnamed file — actually a real photo of the jarred candied jalapeños
     desc: "Candied jalapeños — sweet, hot, and gone in a hurry on crackers with cream cheese.",
     comingSoon: false
   },

@@ -348,6 +348,41 @@
 
     var relatedGrid = document.getElementById("relatedGrid");
     if (relatedGrid) relatedGrid.setAttribute("data-exclude", product.slug);
+
+    var galleryEl = document.querySelector(".pdp-gallery");
+    if (galleryEl) galleryEl.setAttribute("data-slug", product.slug);
+  }
+
+  /* ---------- Product photo gallery (scrollable thumbs when >1 real photo) ---------- */
+  function initPDPGallery() {
+    document.querySelectorAll(".pdp-gallery[data-slug]").forEach(function (galleryEl) {
+      var product = findProduct(galleryEl.getAttribute("data-slug"));
+      var mainImg = galleryEl.querySelector("img");
+      if (!product || !mainImg) return;
+      var base = document.body.getAttribute("data-depth") === "1" ? "../" : "";
+      var images = [product.image].concat(product.gallery || []);
+      if (images.length < 2) return;
+
+      var thumbs = document.createElement("div");
+      thumbs.className = "pdp-gallery-thumbs";
+      thumbs.innerHTML = images
+        .map(function (src, i) {
+          return (
+            '<img src="' + base + src + '" alt="' + product.name + " photo " + (i + 1) + '" ' +
+            'class="' + (i === 0 ? "active" : "") + '" data-src="' + base + src + '" />'
+          );
+        })
+        .join("");
+      galleryEl.appendChild(thumbs);
+
+      thumbs.querySelectorAll("img").forEach(function (thumb) {
+        thumb.addEventListener("click", function () {
+          mainImg.src = thumb.getAttribute("data-src");
+          thumbs.querySelectorAll("img").forEach(function (t) { t.classList.remove("active"); });
+          thumb.classList.add("active");
+        });
+      });
+    });
   }
 
   /* ---------- Product detail page: qty stepper + add to cart ---------- */
@@ -573,6 +608,7 @@
     initFeatured();
     initPantryList();
     initGenericProductPage();
+    initPDPGallery();
     initPDP();
     initRelated();
     initCheckoutForm();
