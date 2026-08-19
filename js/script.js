@@ -38,8 +38,12 @@
   var STOCK = {};
   var stockListeners = [];
   function onStockLoaded(fn) { stockListeners.push(fn); }
-  function stockFor(slug) { return STOCK[slug]; }
-  function isSoldOut(p) { return !p.comingSoon && stockFor(p.slug) === 0; }
+  function stockFor(key) { return STOCK[key]; }
+  function isSoldOut(p) {
+    if (p.comingSoon) return false;
+    if (p.sizes) return p.sizes.every(function (s) { return stockFor(s.stockKey) === 0; });
+    return stockFor(p.slug) === 0;
+  }
   function fetchInventory() {
     return fetch("/api/inventory")
       .then(function (res) { return res.ok ? res.json() : null; })
@@ -48,31 +52,39 @@
       .then(function () { stockListeners.forEach(function (fn) { fn(); }); });
   }
 
-  function addToCart(slug, qty) {
+  function addToCart(slug, qty, sizeIndex) {
     qty = qty || 1;
     var product = findProduct(slug);
-    if (!product || product.comingSoon || isSoldOut(product)) return;
+    if (!product || product.comingSoon) return;
+    var variant = (product.sizes && product.sizes[sizeIndex || 0]) || null;
+    var stockKey = variant ? variant.stockKey : product.slug;
+    var price = variant ? variant.price : product.price;
+    var size = variant ? variant.size : product.size;
+    if (stockFor(stockKey) === 0) {
+      if (product.sizes) showToast(product.name + " — that size is sold out. Pick a different size on the product page.");
+      return;
+    }
     var cart = getCart();
-    var line = cart.filter(function (i) { return i.slug === slug; })[0];
+    var line = cart.filter(function (i) { return i.slug === slug && (i.stockKey || i.slug) === stockKey; })[0];
     if (line) {
       line.qty += qty;
     } else {
       cart.push({
-        slug: product.slug, name: product.name, price: product.price,
-        size: product.size, image: product.image, maker: product.maker, qty: qty
+        slug: product.slug, stockKey: stockKey, name: product.name, price: price,
+        size: size, image: product.image, maker: product.maker, qty: qty
       });
     }
     saveCart(cart);
-    showToast(product.name + " added to your pantry cart.");
+    showToast(product.name + (variant ? " (" + size + ")" : "") + " added to your pantry cart.");
     renderCartPage();
   }
-  function removeFromCart(slug) {
-    saveCart(getCart().filter(function (i) { return i.slug !== slug; }));
+  function removeFromCart(slug, stockKey) {
+    saveCart(getCart().filter(function (i) { return !(i.slug === slug && (i.stockKey || i.slug) === (stockKey || slug)); }));
     renderCartPage();
   }
-  function setQty(slug, qty) {
+  function setQty(slug, qty, stockKey) {
     var cart = getCart();
-    var line = cart.filter(function (i) { return i.slug === slug; })[0];
+    var line = cart.filter(function (i) { return i.slug === slug && (i.stockKey || i.slug) === (stockKey || slug); })[0];
     if (!line) return;
     line.qty = Math.max(1, qty);
     saveCart(cart);
@@ -178,13 +190,16 @@
     var detail = product.detail || ("shop/product.html?slug=" + product.slug);
     var badges = product.badges.map(function (b) { return '<span class="badge ' + badgeClass(b) + '">' + b + "</span>"; }).join("");
     var soldOut = isSoldOut(product);
-    var addBtnHTML = soldOut
+    var addBtnHTML = product.sizes
+      ? '<a class="btn btn-primary" href="' + base + detail + '">Choose Size &amp; Add to Cart</a>'
+      : soldOut
       ? '<button class="btn btn-primary" disabled>Sold Out — Check Back Soon</button>'
       : '<button class="btn btn-primary" onclick="BearPantry.addToCart(\'' + product.slug + "', 1); BearPantry.closeQuickView();\">Add to Cart</button>";
+    var priceLabel = product.sizes ? "From $" + Math.min.apply(null, product.sizes.map(function (s) { return s.price; })).toFixed(2) : "$" + product.price.toFixed(2);
     body.innerHTML =
       '<span class="pdp-maker">' + (product.maker === "mama" ? "Mama Bear's" : product.maker === "papa" ? "Papa Bear's" : "The Bear Pantry") + "</span>" +
       "<h2 class=\"pdp-title\" style=\"font-size:1.7rem\">" + product.name + "</h2>" +
-      '<div class="pdp-price">$' + product.price.toFixed(2) + ' <span class="size">' + product.size + "</span></div>" +
+      '<div class="pdp-price">' + priceLabel + ' <span class="size">' + product.size + "</span></div>" +
       '<p class="pdp-desc">' + product.desc + "</p>" +
       '<div class="pdp-badges">' + badges + (soldOut ? '<span class="badge badge-soldout">Sold Out</span>' : "") + "</div>" +
       '<div class="hero-ctas">' +
@@ -221,12 +236,12 @@
         '<img src="' + item.image + '" alt="' + item.name + '" />' +
         '<div class="name-wrap"><span class="maker">' + (item.maker === "mama" ? "Mama Bear's" : item.maker === "papa" ? "Papa Bear's" : "The Bear Pantry") + '</span><div class="name">' + item.name + '</div><div style="font-size:0.82rem;color:var(--ink-soft)">' + item.size + "</div></div>" +
         '<div class="qty-stepper">' +
-        '<button onclick="BearPantry.setQty(\'' + item.slug + "', " + (item.qty - 1) + ')">−</button>' +
+        '<button onclick="BearPantry.setQty(\'' + item.slug + "', " + (item.qty - 1) + ", '" + (item.stockKey || item.slug) + '\')">−</button>' +
         "<span>" + item.qty + "</span>" +
-        '<button onclick="BearPantry.setQty(\'' + item.slug + "', " + (item.qty + 1) + ')">+</button>' +
+        '<button onclick="BearPantry.setQty(\'' + item.slug + "', " + (item.qty + 1) + ", '" + (item.stockKey || item.slug) + '\')">+</button>' +
         "</div>" +
         '<div class="product-price">$' + (item.price * item.qty).toFixed(2) + "</div>" +
-        '<button class="cart-remove" onclick="BearPantry.removeFromCart(\'' + item.slug + "')\">Remove</button>" +
+        '<button class="cart-remove" onclick="BearPantry.removeFromCart(\'' + item.slug + "', '" + (item.stockKey || item.slug) + "')\">Remove</button>" +
         "</div>"
       );
     }).join("");
@@ -462,9 +477,41 @@
     if (!slug) return;
     var product = findProduct(slug);
     if (!product || product.comingSoon) return;
-    var soldOut = isSoldOut(product);
+    var sizeIndex = parseInt(addBtn.getAttribute("data-size-index"), 10) || 0;
+    var variant = product.sizes ? product.sizes[sizeIndex] : null;
+    var stockKey = variant ? variant.stockKey : product.slug;
+    var soldOut = stockFor(stockKey) === 0;
     addBtn.disabled = soldOut;
     addBtn.textContent = soldOut ? "Sold Out — Check Back Soon" : "Add to Cart";
+  }
+  function initPDPSizeSelector() {
+    var addBtn = document.getElementById("pdpAddBtn");
+    var priceEl = document.getElementById("pdpPriceText");
+    if (!addBtn || !priceEl) return;
+    var slug = addBtn.getAttribute("data-slug");
+    var product = slug ? findProduct(slug) : null;
+    if (!product || !product.sizes || document.querySelector(".pdp-size-selector")) return;
+
+    var wrap = document.createElement("div");
+    wrap.className = "pdp-size-selector";
+    wrap.innerHTML = product.sizes.map(function (s, i) {
+      return '<button type="button" class="pdp-size-option' + (i === 0 ? " active" : "") + '" data-index="' + i + '">' + s.size + "</button>";
+    }).join("");
+    priceEl.parentNode.insertBefore(wrap, priceEl.nextSibling);
+
+    function selectSize(i) {
+      addBtn.setAttribute("data-size-index", i);
+      var variant = product.sizes[i];
+      priceEl.innerHTML = "$" + variant.price.toFixed(2) + ' <span class="size">' + variant.size + "</span>";
+      wrap.querySelectorAll(".pdp-size-option").forEach(function (btn, idx) {
+        btn.classList.toggle("active", idx === i);
+      });
+      applyPDPStockState();
+    }
+    wrap.querySelectorAll(".pdp-size-option").forEach(function (btn) {
+      btn.addEventListener("click", function () { selectSize(parseInt(btn.getAttribute("data-index"), 10)); });
+    });
+    selectSize(0);
   }
   function initPDP() {
     var stepper = document.getElementById("pdpQtyStepper");
@@ -478,8 +525,10 @@
       });
     });
     addBtn.addEventListener("click", function () {
-      addToCart(addBtn.getAttribute("data-slug"), parseInt(qtyEl.textContent, 10));
+      var sizeIndex = parseInt(addBtn.getAttribute("data-size-index"), 10) || 0;
+      addToCart(addBtn.getAttribute("data-slug"), parseInt(qtyEl.textContent, 10), sizeIndex);
     });
+    initPDPSizeSelector();
     applyPDPStockState();
     onStockLoaded(applyPDPStockState);
   }

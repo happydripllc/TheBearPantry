@@ -122,7 +122,8 @@ async function handleOrder(request, env) {
   const stock = await getStock(env);
   const shortfalls = [];
   for (const item of items) {
-    const available = stock[item.slug];
+    const key = item.stockKey || item.slug;
+    const available = stock[key];
     if (available == null) continue;
     const qty = Number(item.qty) || 0;
     if (qty > available) {
@@ -140,8 +141,9 @@ async function handleOrder(request, env) {
     }, 409);
   }
   for (const item of items) {
-    if (stock[item.slug] == null) continue;
-    stock[item.slug] -= (Number(item.qty) || 0);
+    const key = item.stockKey || item.slug;
+    if (stock[key] == null) continue;
+    stock[key] -= (Number(item.qty) || 0);
   }
   if (env.INVENTORY_KV) {
     await env.INVENTORY_KV.put(STOCK_KEY, JSON.stringify(stock));
@@ -271,7 +273,13 @@ async function handleOrder(request, env) {
    All stock counts live under one KV key as a single JSON object, e.g.
    { "papa-bears-smokey-jalapeno-salsa": 20 }. A product with no entry here
    is untracked and always shown as available — tracking is opt-in per
-   product via the admin page, not automatic for the whole catalog. */
+   product via the admin page, not automatic for the whole catalog.
+
+   Products that come in more than one jar size (see `sizes` in
+   js/products.js) get one stock key per size instead of one per product —
+   e.g. "pickled-beets" (default size) and "pickled-beets-32oz". Cart items
+   carry a `stockKey` for exactly this reason; it's what gets checked/
+   decremented here, falling back to the plain slug for single-size items. */
 const STOCK_KEY = "stock";
 
 async function getStock(env) {

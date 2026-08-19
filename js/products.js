@@ -50,6 +50,10 @@ const PRODUCTS = [
     category: "pantry",
     price: 7.5,
     size: "16 oz jar",
+    sizes: [
+      { size: "16 oz jar", price: 7.5, stockKey: "papa-bears-classic-green-beans" },
+      { size: "32 oz jar", price: 14, stockKey: "papa-bears-classic-green-beans-32oz" }
+    ],
     badges: ["Pantry Favorite"],
     image: "images/papa-bears-classic-green-beans.png",
     desc: "Simple, tender, put-up-right green beans — the way Papa Bear always asked for them at supper.",
@@ -106,8 +110,12 @@ const PRODUCTS = [
     name: "Mama Bear's Sunrise Orange Marmalade",
     maker: "mama",
     category: "sweet",
-    price: 8.5,
-    size: "8 oz jar",
+    price: 6.5,
+    size: "6 oz jar",
+    sizes: [
+      { size: "6 oz jar", price: 6.5, stockKey: "sunrise-orange-marmalade" },
+      { size: "8 oz jar", price: 8.5, stockKey: "sunrise-orange-marmalade-8oz" }
+    ],
     badges: ["Seasonal"],
     image: "images/SunriseOrangeMarmalade.jpeg",
     desc: "Bright, bittersweet, and stubbornly good on a warm biscuit.",
@@ -213,6 +221,10 @@ const PRODUCTS = [
     category: "pickled",
     price: 9.5,
     size: "8 oz jar",
+    sizes: [
+      { size: "8 oz jar", price: 9.5, stockKey: "cowboy-candy" },
+      { size: "12 oz jar", price: 13.5, stockKey: "cowboy-candy-12oz" }
+    ],
     badges: ["Seasonal"],
     image: "images/CowboyCandy.jpeg",
     gallery: ["images/PineappleSalsa.jpg"], // misnamed file — actually a real photo of the jarred candied jalapeños
@@ -227,6 +239,10 @@ const PRODUCTS = [
     category: "pickled",
     price: 8.5,
     size: "16 oz jar",
+    sizes: [
+      { size: "16 oz jar", price: 8.5, stockKey: "pickled-beets" },
+      { size: "32 oz jar", price: 15.5, stockKey: "pickled-beets-32oz" }
+    ],
     badges: ["Seasonal"],
     image: "images/PickledBeets.jpeg",
     desc: "Earthy, tangy, and exactly the kind of jar that disappears at a family potluck.",

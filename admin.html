@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/styles.css?v=8" />
+<link rel="stylesheet" href="css/styles.css?v=9" />
 <style>
   /* Admin-only layout — not part of the public design system, kept local to this page. */
   body { background: var(--cream); }
@@ -79,7 +79,7 @@
   </div>
 </div>
 
-<script src="js/products.js?v=7"></script>
+<script src="js/products.js?v=8"></script>
 <script>
 (function () {
   "use strict";
@@ -100,13 +100,25 @@
   });
 
   function renderTable() {
-    table.innerHTML = PRODUCTS.map(function (p) {
-      var val = currentStock[p.slug];
+    // Products with more than one jar size (see `sizes` in products.js) get
+    // one row per size — each size tracks its own stock count separately.
+    var rows = [];
+    PRODUCTS.forEach(function (p) {
+      if (p.sizes) {
+        p.sizes.forEach(function (s) {
+          rows.push({ key: s.stockKey, name: p.name + " — " + s.size, image: p.image, comingSoon: p.comingSoon });
+        });
+      } else {
+        rows.push({ key: p.slug, name: p.name, image: p.image, comingSoon: p.comingSoon });
+      }
+    });
+    table.innerHTML = rows.map(function (r) {
+      var val = currentStock[r.key];
       return (
-        '<div class="inv-row" data-slug="' + p.slug + '">' +
-        '<img src="' + p.image + '" alt="" />' +
-        '<div><div class="inv-name">' + p.name + "</div>" +
-        '<div class="inv-meta">' + p.slug + (p.comingSoon ? " · coming soon (not purchasable yet)" : "") + "</div></div>" +
+        '<div class="inv-row" data-slug="' + r.key + '">' +
+        '<img src="' + r.image + '" alt="" />' +
+        '<div><div class="inv-name">' + r.name + "</div>" +
+        '<div class="inv-meta">' + r.key + (r.comingSoon ? " · coming soon (not purchasable yet)" : "") + "</div></div>" +
         '<input type="number" min="0" step="1" placeholder="Unlimited" value="' + (val != null ? val : "") + '" />' +
         "</div>"
       );
