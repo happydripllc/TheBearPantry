@@ -2,7 +2,9 @@
    This site deploys as a Cloudflare Worker with static assets (not classic
    Pages), so there's no /functions auto-routing — this file is the single
    place that intercepts API routes before falling through to the static
-   site. Everything that isn't handled below is served as-is from ASSETS. */
+   site. Everything that isn't handled below is served as-is from ASSETS.
+   (Secrets set in the dashboard don't take effect until the next deploy —
+   this comment exists to force one when that's all that's needed.) */
 
 export default {
   async fetch(request, env) {
